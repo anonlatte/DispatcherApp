@@ -454,6 +454,7 @@ message CreateCabRideDispatcherRequest {
 message CreateCabRideDispatcherResponse {
     string api = 1;
     bool isCreated = 2;
+    int32 cabRideId = 3;
 }
 
 message SetDetailsToOrderRequest {
@@ -488,6 +489,17 @@ message VerifyDriversAccountResponse {
     bool isVerified = 2;
 }
 
+message ReadAllCustomersRequest {
+    string api = 1;
+    string authToken = 2;
+}
+
+message ReadAllCustomersResponse {
+    string api = 1;
+    repeated Customer customer = 2;
+}
+
+
 service taxiService {
     // Auth routes
     rpc LoginUser (LoginRequest) returns (LoginResponse);
@@ -496,6 +508,7 @@ service taxiService {
     // customer CRUD
     rpc CreateCustomer (CreateCustomerRequest) returns (CreateCustomerResponse);
     rpc ReadCustomer (ReadCustomerRequest) returns (ReadCustomerResponse);
+    rpc ReadAllCustomers (ReadAllCustomersRequest) returns (ReadAllCustomersResponse);
     rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
     rpc DeleteCustomer (DeleteCustomerRequest) returns (DeleteCustomerResponse);
 

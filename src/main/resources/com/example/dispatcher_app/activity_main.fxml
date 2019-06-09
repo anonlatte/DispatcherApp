@@ -5,8 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity"
-            prefHeight="700.0" prefWidth="1179.0" xmlns="http://javafx.com/javafx/11.0.1"
+            minWidth="-Infinity" prefHeight="700.0" prefWidth="1179.0" xmlns="http://javafx.com/javafx/11.0.1"
             fx:controller="com.example.dispatcher_app.ActivityMain">
     <center>
         <JFXTreeTableView fx:id="driversTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
@@ -34,8 +33,18 @@
                 <MenuItem mnemonicParsing="false" text="Закрыть"/>
             </Menu>
             <Menu mnemonicParsing="false" text="Заказы">
-                <MenuItem mnemonicParsing="false" text="Создать заказ" fx:id="makeOrderMenu"/>
+                <MenuItem fx:id="makeOrderMenu" mnemonicParsing="false" text="Создать заказ"/>
                 <MenuItem mnemonicParsing="false" text="Список заказов"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Клиенты">
+                <items>
+                    <MenuItem mnemonicParsing="false" text="Список клиентов" fx:id="clientsList"/>
+                </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Водители">
+                <items>
+                    <MenuItem mnemonicParsing="false" text="Список водителей"/>
+                </items>
             </Menu>
         </MenuBar>
     </top>

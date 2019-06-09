@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="700.0" prefWidth="1179.0" xmlns="http://javafx.com/javafx/11.0.1"
+            fx:controller="com.example.dispatcher_app.ActivityCustomers">
+    <center>
+        <JFXTreeTableView fx:id="customersTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <columns>
+                <JFXTreeTableColumn fx:id="idColumn" text="id"/>
+                <JFXTreeTableColumn fx:id="nameColumn" text="Имя"/>
+                <JFXTreeTableColumn fx:id="phoneColumn" text="Номер телефона"/>
+                <JFXTreeTableColumn fx:id="emailColumn" text="Email"/>
+                <JFXTreeTableColumn fx:id="createDateColumn" text="Дата регистрации"/>
+            </columns>
+            <columnResizePolicy>
+                <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </JFXTreeTableView>
+    </center>
+    <left>
+        <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="631.0"
+                  prefWidth="235.0" BorderPane.alignment="TOP_CENTER">
+            <JFXTextField fx:id="searchBar" prefHeight="40.0" prefWidth="250.0" promptText="Поиск">
+                <FlowPane.margin>
+                    <Insets top="50.0"/>
+                </FlowPane.margin>
+            </JFXTextField>
+            <JFXButton fx:id="updateButton" alignment="CENTER" buttonType="RAISED" contentDisplay="CENTER"
+                       onMouseClicked="#getCustomers" style="-fx-border-color: rgba(0,0,0,0.5);" text="Обновить"
+                       textAlignment="CENTER">
+                <FlowPane.margin>
+                    <Insets top="20.0"/>
+                </FlowPane.margin>
+            </JFXButton>
+        </FlowPane>
+    </left>
+</BorderPane>

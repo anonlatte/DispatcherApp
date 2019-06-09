@@ -29,6 +29,8 @@ class ActivityMain : Initializable {
     @FXML
     lateinit var makeOrderMenu: MenuItem
     @FXML
+    lateinit var clientsList: MenuItem
+    @FXML
     lateinit var verificationButton: JFXButton
     @FXML
     lateinit var updateButton: JFXButton
@@ -100,6 +102,10 @@ class ActivityMain : Initializable {
 
         makeOrderMenu.setOnAction {
             showOrderDialog()
+        }
+
+        clientsList.setOnAction {
+            Main.loadFxml("activity_customers.fxml", "Список клиентов")
         }
     }
 
