@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.layout.*?>
+<FlowPane xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" columnHalignment="CENTER" orientation="VERTICAL"
+          prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1"
+          fx:controller="com.example.dispatcher_app.ActivitySignUp">
+    <JFXTextField fx:id="surnameEdit" prefHeight="50.0" prefWidth="350.0" promptText="Фамилия"
+                  style="-fx-background-color: rgba(0,0,0,0.05);"/>
+    <JFXTextField fx:id="nameEdit" prefHeight="50.0" prefWidth="350.0" promptText="Имя"
+                  style="-fx-background-color: rgba(0,0,0,0.05);">
+        <FlowPane.margin>
+            <Insets top="14.0"/>
+        </FlowPane.margin>
+    </JFXTextField>
+
+    <JFXTextField fx:id="patronymicEdit" prefHeight="50.0" prefWidth="350.0" promptText="Отчество"
+                  style="-fx-background-color: rgba(0,0,0,0.05);">
+        <FlowPane.margin>
+            <Insets top="14.0"/>
+        </FlowPane.margin>
+    </JFXTextField>
+
+    <JFXTextField fx:id="phoneNumberEdit" prefHeight="50.0" prefWidth="350.0" promptText="Номер телефона +7"
+                  style="-fx-background-color: rgba(0,0,0,0.05);">
+        <FlowPane.margin>
+            <Insets top="14.0"/>
+        </FlowPane.margin>
+    </JFXTextField>
+
+    <JFXTextField fx:id="emailEdit" prefHeight="50.0" prefWidth="350.0" promptText="E-mail"
+                  style="-fx-background-color: rgba(0,0,0,0.05);">
+        <FlowPane.margin>
+            <Insets top="14.0"/>
+        </FlowPane.margin>
+    </JFXTextField>
+
+    <JFXTextField fx:id="passwordEdit" prefHeight="50.0" prefWidth="350.0" promptText="Пароль"
+                  style="-fx-background-color: rgba(0,0,0,0.05);">
+        <FlowPane.margin>
+            <Insets top="14.0"/>
+        </FlowPane.margin>
+    </JFXTextField>
+
+    <JFXButton fx:id="registerButton" onMouseClicked="#registerUser" prefHeight="40.0" prefWidth="200.0"
+               style="-fx-border-color: rgba(0,0,0,0.5);" text="Зарегистрироваться">
+        <FlowPane.margin>
+            <Insets top="14.0"/>
+        </FlowPane.margin>
+    </JFXButton>
+    <JFXButton fx:id="signInLabel" onMouseClicked="#signInScene" text="Я уже зарегистрирован" textAlignment="CENTER">
+        <FlowPane.margin>
+            <Insets top="14.0"/>
+        </FlowPane.margin>
+    </JFXButton>
+</FlowPane>

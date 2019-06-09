@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity"
+            prefHeight="700.0" prefWidth="1179.0" xmlns="http://javafx.com/javafx/11.0.1"
+            fx:controller="com.example.dispatcher_app.ActivityMain">
+    <center>
+        <JFXTreeTableView fx:id="driversTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <columns>
+                <JFXTreeTableColumn fx:id="idColumn" text="id"/>
+                <JFXTreeTableColumn fx:id="surnameColumn" text="Фамилия"/>
+                <JFXTreeTableColumn fx:id="nameColumn" text="Имя"/>
+                <JFXTreeTableColumn fx:id="patronymicColumn" text="Отчество"/>
+                <JFXTreeTableColumn fx:id="birthDateColumn" text="Дата рождения"/>
+                <JFXTreeTableColumn fx:id="phoneColumn" text="Номер телефона"/>
+                <JFXTreeTableColumn fx:id="statusColumn" text="Статус"/>
+                <JFXTreeTableColumn fx:id="emailColumn" text="Email"/>
+                <JFXTreeTableColumn fx:id="activatedColumn" text="Активирован"/>
+                <JFXTreeTableColumn fx:id="createDateColumn" text="Дата регистрации"/>
+            </columns>
+            <columnResizePolicy>
+                <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </JFXTreeTableView>
+    </center>
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <Menu mnemonicParsing="false" text="Файл">
+                <MenuItem mnemonicParsing="false" text="Сохранить"/>
+                <MenuItem mnemonicParsing="false" text="Закрыть"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Заказы">
+                <MenuItem mnemonicParsing="false" text="Создать заказ" fx:id="makeOrderMenu"/>
+                <MenuItem mnemonicParsing="false" text="Список заказов"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <left>
+        <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="631.0"
+                  prefWidth="235.0" BorderPane.alignment="TOP_CENTER">
+            <JFXTextField fx:id="searchBar" prefHeight="40.0" prefWidth="250.0" promptText="Поиск">
+                <FlowPane.margin>
+                    <Insets top="50.0"/>
+                </FlowPane.margin>
+            </JFXTextField>
+            <JFXToggleButton fx:id="unverifiedToggle" alignment="CENTER_LEFT" prefHeight="45.0" prefWidth="270.0"
+                             size="7.0" text="Неподтвержденные водители">
+                <FlowPane.margin>
+                    <Insets top="14.0"/>
+                </FlowPane.margin>
+            </JFXToggleButton>
+            <JFXToggleButton fx:id="onWorkToggle" alignment="CENTER_LEFT" prefHeight="45.0" prefWidth="270.0" size="7.0"
+                             text="На работе"/>
+            <JFXButton fx:id="updateButton" alignment="CENTER" buttonType="RAISED" contentDisplay="CENTER"
+                       onMouseClicked="#getDrivers" style="-fx-border-color: rgba(0,0,0,0.5);" text="Обновить"
+                       textAlignment="CENTER">
+                <FlowPane.margin>
+                    <Insets top="20.0"/>
+                </FlowPane.margin>
+            </JFXButton>
+        </FlowPane>
+    </left>
+    <bottom>
+        <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="90.0" prefWidth="1179.0"
+                  BorderPane.alignment="CENTER">
+            <JFXButton fx:id="verificationButton" mnemonicParsing="false" onMouseClicked="#verifyDriver"
+                       prefHeight="40.0" prefWidth="203.0" style="-fx-border-color: rgba(0,0,0,0.5);"
+                       text="Подтвердить аккаунт"/>
+        </FlowPane>
+    </bottom>
+</BorderPane>
