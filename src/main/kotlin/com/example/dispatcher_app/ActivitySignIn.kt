@@ -4,10 +4,12 @@ import com.example.dispatcher_app.taxiServiceGrpc.newBlockingStub
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXTextField
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.scene.control.Alert
 import javafx.scene.control.Label
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,7 +29,6 @@ class ActivitySignIn : Initializable {
     @FXML
     lateinit var passwordLabel: Label
     private lateinit var pref: Preferences
-    private val validation = Validation()
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         pref = Preferences.userNodeForPackage(Main::class.java)
@@ -73,19 +74,29 @@ class ActivitySignIn : Initializable {
                     passwordEdit.text = ""
                 }
             } catch (e: StatusRuntimeException) {
-                // Check exceptions
-                // TODO вывод сообщения об ошибке
-                e.printStackTrace()
-/*
                 if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка соединения"
+                        alert.showAndWait()
+                    }
                 } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Неверные данные"
+                        alert.showAndWait()
+                    }
                 } else if (e.status.code == Status.Code.UNKNOWN) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка сервера"
+                        alert.showAndWait()
+                    }
                 }
-*/
-                //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
+                e.printStackTrace()
                 managedChannel.shutdown()
             }
         }

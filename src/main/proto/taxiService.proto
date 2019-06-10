@@ -110,9 +110,10 @@ message CabRideStatus {
     int32 id = 1;
     int32 cabRideId = 2;
     int32 shiftId = 3;
-    google.protobuf.Timestamp statusTime = 4;
-    int32 statusDetails = 5;
-    int32 dispatcherId = 6;
+    int32 statusTime = 4;
+    string statusDetails = 5;
+    int32 ride_status = 6;
+    int32 dispatcherId = 7;
 
 }
 
@@ -499,6 +500,46 @@ message ReadAllCustomersResponse {
     repeated Customer customer = 2;
 }
 
+message ReadAllCabRidesRequest {
+    string api = 1;
+    string authToken = 2;
+}
+
+message ReadAllCabRidesResponse {
+    string api = 1;
+    repeated CabRide cabRide = 2;
+}
+
+message ReadCabRideStatusRequest {
+    string api = 1;
+    string authToken = 2;
+    int32 cabRideId = 3;
+}
+
+message ReadCabRideStatusResponse {
+    string api = 1;
+    CabRideStatus cabRideStatus = 2;
+}
+
+message ReadDriverStatisticRequest {
+    string api = 1;
+    int32 driverId = 2;
+}
+
+message ReadDriverStatisticResponse {
+    string api = 1;
+    int32 endedCabRides = 2;
+}
+
+message ReadCustomerStatisticRequest {
+    string api = 1;
+    int32 customerId = 2;
+}
+
+message ReadCustomerStatisticResponse {
+    string api = 1;
+    int32 orderedCabRides = 2;
+}
 
 service taxiService {
     // Auth routes
@@ -523,6 +564,10 @@ service taxiService {
     rpc DeleteCabRide (DeleteCabRideRequest) returns (DeleteCabRideResponse);
     rpc UpdateCabRide (UpdateCabRideRequest) returns (UpdateCabRideResponse);
     rpc CheckCabRideStatus (CheckCabRideStatusRequest) returns (CheckCabRideStatusResponse);
+    rpc ReadAllCabRides (ReadAllCabRidesRequest) returns (ReadAllCabRidesResponse);
+
+    // CabRide status
+    rpc ReadCabRideStatus (ReadCabRideStatusRequest) returns (ReadCabRideStatusResponse);
 
     // Cabs routes
     rpc ReadAllCarBrands (ReadAllCarBrandsRequest) returns (ReadAllCarBrandsResponse);
@@ -550,4 +595,8 @@ service taxiService {
     rpc SetDetailsToOrder (SetDetailsToOrderRequest) returns (SetDetailsToOrderResponse);
     rpc ReadAllDrivers (ReadAllDriversRequest) returns (ReadAllDriversResponse);
     rpc VerifyDriversAccount (VerifyDriversAccountRequest) returns (VerifyDriversAccountResponse);
+
+    // Statistic
+    rpc ReadDriverStatistic (ReadDriverStatisticRequest) returns (ReadDriverStatisticResponse);
+    rpc ReadCustomerStatistic (ReadCustomerStatisticRequest) returns (ReadCustomerStatisticResponse);
 }

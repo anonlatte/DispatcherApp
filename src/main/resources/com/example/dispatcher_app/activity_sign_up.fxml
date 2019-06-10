@@ -43,7 +43,7 @@
         </FlowPane.margin>
     </JFXTextField>
 
-    <JFXButton fx:id="registerButton" onMouseClicked="#registerUser" prefHeight="40.0" prefWidth="200.0"
+    <JFXButton onMouseClicked="#registerUser" prefHeight="40.0" prefWidth="200.0"
                style="-fx-border-color: rgba(0,0,0,0.5);" text="Зарегистрироваться">
         <FlowPane.margin>
             <Insets top="14.0"/>

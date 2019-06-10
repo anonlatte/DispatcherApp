@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity"
+            prefHeight="700.0" prefWidth="1402.0" xmlns="http://javafx.com/javafx/11.0.1"
+            fx:controller="com.example.dispatcher_app.ActivityOrders">
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <Menu mnemonicParsing="false" text="Файл">
+                <MenuItem mnemonicParsing="false" text="Сохранить данные" onAction="#saveDataToExcel"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <JFXTreeTableView fx:id="ordersTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <columns>
+                <JFXTreeTableColumn fx:id="idColumn" text="id"/>
+                <JFXTreeTableColumn fx:id="customerIdColumn" text="id Заказчика"/>
+                <JFXTreeTableColumn fx:id="rideStartTimeColumn" text="Начало поездки"/>
+                <JFXTreeTableColumn fx:id="rideEndTimeColumn" text="Конец поездки"/>
+                <JFXTreeTableColumn fx:id="startingPointColumn" text="Откуда"/>
+                <JFXTreeTableColumn fx:id="entranceColumn" text="Подъезд"/>
+                <JFXTreeTableColumn fx:id="endingPointColumn" text="Куда"/>
+                <JFXTreeTableColumn fx:id="isCanceledColumn" text="Отменен"/>
+                <JFXTreeTableColumn fx:id="isOrderedForAnotherColumn" text="Заказ другому"/>
+                <JFXTreeTableColumn fx:id="isPendingOrderColumn" text="Отложенный заказ"/>
+                <JFXTreeTableColumn fx:id="paymentTypeColumn" text="Тип оплаты"/>
+                <JFXTreeTableColumn fx:id="priceColumn" text="Цена"/>
+                <JFXTreeTableColumn fx:id="commentColumn" text="Комментарий"/>
+                <JFXTreeTableColumn fx:id="feedbackColumn" text="Отзыв"/>
+            </columns>
+            <columnResizePolicy>
+                <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </JFXTreeTableView>
+    </center>
+    <left>
+        <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="631.0"
+                  prefWidth="235.0" BorderPane.alignment="TOP_CENTER">
+            <JFXTextField fx:id="searchBar" prefHeight="40.0" prefWidth="250.0" promptText="Поиск">
+                <FlowPane.margin>
+                    <Insets top="50.0"/>
+                </FlowPane.margin>
+            </JFXTextField>
+            <JFXButton fx:id="updateButton" alignment="CENTER" buttonType="RAISED" contentDisplay="CENTER"
+                       onMouseClicked="#getOrders" style="-fx-border-color: rgba(0,0,0,0.5);" text="Обновить"
+                       textAlignment="CENTER">
+                <FlowPane.margin>
+                    <Insets top="20.0"/>
+                </FlowPane.margin>
+            </JFXButton>
+        </FlowPane>
+    </left>
+    <bottom>
+        <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="60.0" prefWidth="1402.0"
+                  BorderPane.alignment="CENTER">
+            <JFXButton prefHeight="28.0" prefWidth="201.0"
+                       style="-fx-border-color: rgba(0,0,0,0.5);" text="Добавить информацию" onMouseClicked="#addInfo">
+                <FlowPane.margin>
+                    <Insets right="14.0"/>
+                </FlowPane.margin>
+            </JFXButton>
+            <JFXButton style="-fx-background-color: RED;" text="Отменить"
+                       textFill="WHITE" onMouseClicked="#cancelOrder">
+                <FlowPane.margin>
+                    <Insets/>
+                </FlowPane.margin>
+            </JFXButton>
+        </FlowPane>
+    </bottom>
+</BorderPane>

@@ -11,6 +11,8 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.scene.control.Alert
+import javafx.scene.control.Alert.AlertType
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TreeItem
 import javafx.util.Callback
@@ -27,7 +29,11 @@ class ActivityMain : Initializable {
 
     private lateinit var pref: Preferences
     @FXML
+    lateinit var ordersList: MenuItem
+    @FXML
     lateinit var makeOrderMenu: MenuItem
+    @FXML
+    lateinit var saveDataMenu: MenuItem
     @FXML
     lateinit var clientsList: MenuItem
     @FXML
@@ -107,7 +113,12 @@ class ActivityMain : Initializable {
         clientsList.setOnAction {
             Main.loadFxml("activity_customers.fxml", "Список клиентов")
         }
+
+        ordersList.setOnAction {
+            Main.loadFxml("activity_orders.fxml", "Список заказов")
+        }
     }
+
 
     private fun filterWorkingDrivers(
         driversTableTree: TreeItem<DriverInfo>?, working: Boolean?, filteredRoot: TreeItem<DriverInfo>
@@ -334,5 +345,56 @@ class ActivityMain : Initializable {
     @FXML
     fun showOrderDialog() {
         Main.loadFxml("activity_make_order.fxml", "Создание заказа")
+    }
+
+    fun showStatistic() {
+        val selectedDriver = driversTable.selectionModel.selectedItem.value
+
+
+        if (selectedDriver != null) {
+
+            val managedChannel = ManagedChannelBuilder.forAddress(
+                Main.SERVER_ADDRESS,
+                Main.SERVER_PORT
+            ).usePlaintext().build()
+            val blockingStub = newBlockingStub(managedChannel)
+            val readDriverStatisticRequest = ReadDriverStatisticRequest.newBuilder()
+                .setApi(Main.API_VERSION)
+                .setDriverId(selectedDriver.driverId)
+                .build()
+            val readDriverStatisticResponse: ReadDriverStatisticResponse
+            try {
+                readDriverStatisticResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
+                    .readDriverStatistic(readDriverStatisticRequest) // Запрос на создание
+                managedChannel.shutdown()
+
+                val alert = Alert(AlertType.INFORMATION)
+                alert.title = "Статистика " + selectedDriver.surname + " " + selectedDriver.firstName
+                alert.headerText =
+                    "Количество выполненных заказов:" + readDriverStatisticResponse.endedCabRides.toString()
+                alert.showAndWait()
+
+            } catch (e: StatusRuntimeException) {
+                // TODO Check exceptions
+                // TODO вывод сообщения об ошибке
+                e.printStackTrace()
+/*
+                if (e.status.cause is java.net.ConnectException) {
+                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
+                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }
+                } else if (e.status.code == Status.Code.UNKNOWN) {
+                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                }
+*/
+                //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
+                managedChannel.shutdown()
+            }
+        }
+    }
+
+    @FXML
+    fun saveDataToExcel() {
+        Main.saveTableToFile(driversTable, "drivers")
     }
 }

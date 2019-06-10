@@ -4,6 +4,7 @@ import com.example.dispatcher_app.taxiServiceGrpc.newBlockingStub
 import com.jfoenix.controls.*
 import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import javafx.application.Platform
 import javafx.beans.property.SimpleIntegerProperty
@@ -11,8 +12,11 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.scene.control.Alert
 import javafx.scene.control.TreeItem
 import javafx.util.Callback
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
@@ -113,62 +117,141 @@ class ActivityCustomers : Initializable {
     @FXML
     private fun getCustomers() {
         // Build connection and rpc objects
-        val managedChannel = ManagedChannelBuilder.forAddress(
-            Main.SERVER_ADDRESS,
-            Main.SERVER_PORT
-        ).usePlaintext().build()
-        val blockingStub = newBlockingStub(managedChannel)
-        val readAllCustomersRequest = ReadAllCustomersRequest.newBuilder()
-            .setApi(Main.API_VERSION)
-            .build()
-        val readAllCustomersResponse: ReadAllCustomersResponse
-        try {
-            readAllCustomersResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
-                .readAllCustomers(readAllCustomersRequest) // Запрос на создание
-            managedChannel.shutdown()
+        GlobalScope.launch {
+            val managedChannel = ManagedChannelBuilder.forAddress(
+                Main.SERVER_ADDRESS,
+                Main.SERVER_PORT
+            ).usePlaintext().build()
+            val blockingStub = newBlockingStub(managedChannel)
+            val readAllCustomersRequest = ReadAllCustomersRequest.newBuilder()
+                .setApi(Main.API_VERSION)
+                .build()
+            val readAllCustomersResponse: ReadAllCustomersResponse
+            try {
+                readAllCustomersResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
+                    .readAllCustomers(readAllCustomersRequest) // Запрос на создание
+                managedChannel.shutdown()
 
-            val creationDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            customersTableData.clear()
-            readAllCustomersResponse.customerList.forEach {
-                customersTableData.add(
-                    CustomerInfo(
-                        it.id,
-                        it.name,
-                        it.phoneNumber,
-                        it.email,
-                        creationDateFormat.format(it.createTime.seconds * 1000)
+                val creationDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                customersTableData.clear()
+                readAllCustomersResponse.customerList.forEach {
+                    customersTableData.add(
+                        CustomerInfo(
+                            it.id,
+                            it.name,
+                            it.phoneNumber,
+                            it.email,
+                            creationDateFormat.format(it.createTime.seconds * 1000)
+                        )
                     )
-                )
-            }
-            Platform.runLater {
-                customersTable.isShowRoot = false
-                customersTableTree =
-                    RecursiveTreeItem<CustomerInfo>(customersTableData, RecursiveTreeObject<CustomerInfo>::getChildren)
-                customersTable.columns.setAll(
-                    idColumn,
-                    nameColumn,
-                    phoneColumn,
-                    emailColumn,
-                    createDateColumn
-                )
-                customersTable.root = customersTableTree
-            }
-
-        } catch (e: StatusRuntimeException) {
-            // TODO Check exceptions
-            // TODO вывод сообщения об ошибке
-            e.printStackTrace()
-/*
-                if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.UNKNOWN) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
                 }
-*/
-            //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
-            managedChannel.shutdown()
+                Platform.runLater {
+                    customersTable.isShowRoot = false
+                    customersTableTree =
+                        RecursiveTreeItem<CustomerInfo>(
+                            customersTableData,
+                            RecursiveTreeObject<CustomerInfo>::getChildren
+                        )
+                    customersTable.columns.setAll(
+                        idColumn,
+                        nameColumn,
+                        phoneColumn,
+                        emailColumn,
+                        createDateColumn
+                    )
+                    customersTable.root = customersTableTree
+                }
+
+            } catch (e: StatusRuntimeException) {
+                if (e.status.cause is java.net.ConnectException) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка соединения"
+                        alert.showAndWait()
+                    }
+                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Неверные данные"
+                        alert.showAndWait()
+                    }
+                } else if (e.status.code == Status.Code.UNKNOWN) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка сервера"
+                        alert.showAndWait()
+                    }
+                }
+                e.printStackTrace()
+                managedChannel.shutdown()
+            }
         }
+    }
+
+    fun showStatistic() {
+        val selectedCustomer = customersTable.selectionModel.selectedItem.value
+
+        if (selectedCustomer != null) {
+            GlobalScope.launch {
+                val managedChannel = ManagedChannelBuilder.forAddress(
+                    Main.SERVER_ADDRESS,
+                    Main.SERVER_PORT
+                ).usePlaintext().build()
+                val blockingStub = newBlockingStub(managedChannel)
+                val readCustomerStatisticRequest = ReadCustomerStatisticRequest.newBuilder()
+                    .setApi(Main.API_VERSION)
+                    .setCustomerId(selectedCustomer.customerId)
+                    .build()
+                val readCustomerStatisticResponse: ReadCustomerStatisticResponse
+                try {
+                    readCustomerStatisticResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
+                        .readCustomerStatistic(readCustomerStatisticRequest) // Запрос на создание
+                    managedChannel.shutdown()
+
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.INFORMATION)
+                        alert.title =
+                            "Статистика " + selectedCustomer.name + " " + selectedCustomer.phoneNumber + " " + selectedCustomer.email
+                        alert.headerText =
+                            "Количество заказов:" + readCustomerStatisticResponse.orderedCabRides.toString()
+                        alert.showAndWait()
+                    }
+                } catch (e: StatusRuntimeException) {
+                    if (e.status.cause is java.net.ConnectException) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка соединения"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Неверные данные"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.UNKNOWN) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка сервера"
+                            alert.showAndWait()
+                        }
+                    }
+                    e.printStackTrace()
+                    managedChannel.shutdown()
+                }
+            }
+        }
+
+    }
+
+    @FXML
+    fun saveDataToExcel() {
+        Main.saveTableToFile(customersTable, "customers")
     }
 }

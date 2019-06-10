@@ -1,5 +1,7 @@
 package com.example.dispatcher_app
 
+import com.jfoenix.controls.JFXTreeTableView
+import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject
 import io.grpc.ManagedChannelBuilder
 import io.grpc.StatusRuntimeException
 import javafx.application.Application
@@ -7,12 +9,17 @@ import javafx.application.Platform
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.Alert
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.Row
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.prefs.Preferences
@@ -63,9 +70,13 @@ class Main : Application() {
                     }
                 } catch (e: StatusRuntimeException) {
                     if (e.status.cause is java.net.ConnectException) {
-                        // TODO сообщение об ошибке
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка соединения"
+                            alert.showAndWait()
+                        }
                     }
-                    //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
                     managedChannel.shutdown()
 
                     Platform.runLater {
@@ -77,7 +88,6 @@ class Main : Application() {
             loadFxml("activity_sign_in.fxml", "Вход")
         }
     }
-
 
     companion object {
         var SERVER_ADDRESS: String = ""
@@ -109,5 +119,34 @@ class Main : Application() {
             scene.window.hide()
             loadFxml(path, title)
         }
+
+        @JvmStatic
+        fun <T : RecursiveTreeObject<T>?> saveTableToFile(table: JFXTreeTableView<T>, fileName: String) {
+            val workbook = HSSFWorkbook()
+            val sheet = workbook.createSheet("Drivers sheet")
+
+            val rowNum = 0
+            var row: Row
+            //
+            row = sheet.createRow(rowNum)
+
+            for (i in 0 until table.columns.size) {
+                row.createCell(i).setCellValue(table.columns[i].textProperty().value)
+            }
+            for (i in 0 until table.currentItemsCount) {
+                row = sheet.createRow(i + 1)
+                for (j in 0 until table.columns.size) {
+                    if (table.columns[j].getCellData(i) != null) {
+                        row.createCell(j).setCellValue(table.columns[j].getCellData(i).toString())
+                    } else {
+                        row.createCell(j).setCellValue("")
+                    }
+                }
+            }
+            val outFile = FileOutputStream("${fileName}_" + SimpleDateFormat("yyy-MM-dd").format(Date()) + ".xls")
+            workbook.write(outFile)
+            System.out.println("Created file")
+        }
+
     }
 }

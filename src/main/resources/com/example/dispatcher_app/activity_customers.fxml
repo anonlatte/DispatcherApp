@@ -2,11 +2,21 @@
 
 <?import com.jfoenix.controls.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity" prefHeight="700.0" prefWidth="1179.0" xmlns="http://javafx.com/javafx/11.0.1"
             fx:controller="com.example.dispatcher_app.ActivityCustomers">
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <Menu mnemonicParsing="false" text="Файл">
+                <MenuItem mnemonicParsing="false" text="Сохранить данные" onAction="#saveDataToExcel"/>
+            </Menu>
+        </MenuBar>
+    </top>
     <center>
         <JFXTreeTableView fx:id="customersTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <columns>
@@ -38,4 +48,13 @@
             </JFXButton>
         </FlowPane>
     </left>
+    <bottom>
+        <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="60.0" prefWidth="1179.0"
+                  BorderPane.alignment="CENTER">
+            <JFXButton mnemonicParsing="false" onMouseClicked="#showStatistic" prefHeight="40.0" prefWidth="170.0"
+                       style="-fx-border-color: rgba(0,0,0,0.5); -fx-background-color: rgba(23,162,184,0.5);"
+                       text="Показать статистику">
+            </JFXButton>
+        </FlowPane>
+    </bottom>
 </BorderPane>

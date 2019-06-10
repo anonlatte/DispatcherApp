@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity" prefHeight="700.0" prefWidth="1179.0" xmlns="http://javafx.com/javafx/11.0.1"
+            minWidth="-Infinity" prefHeight="700.0" prefWidth="1663.0" xmlns="http://javafx.com/javafx/11.0.1"
             fx:controller="com.example.dispatcher_app.ActivityMain">
     <center>
         <JFXTreeTableView fx:id="driversTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
@@ -29,22 +29,19 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu mnemonicParsing="false" text="Файл">
-                <MenuItem mnemonicParsing="false" text="Сохранить"/>
+                <MenuItem fx:id="saveDataMenu" mnemonicParsing="false" text="Сохранить данные"
+                          onAction="#saveDataToExcel"/>
                 <MenuItem mnemonicParsing="false" text="Закрыть"/>
             </Menu>
             <Menu mnemonicParsing="false" text="Заказы">
                 <MenuItem fx:id="makeOrderMenu" mnemonicParsing="false" text="Создать заказ"/>
-                <MenuItem mnemonicParsing="false" text="Список заказов"/>
+                <MenuItem fx:id="ordersList" mnemonicParsing="false" text="Список заказов"/>
             </Menu>
             <Menu mnemonicParsing="false" text="Клиенты">
-                <items>
-                    <MenuItem mnemonicParsing="false" text="Список клиентов" fx:id="clientsList"/>
-                </items>
+                <MenuItem fx:id="clientsList" mnemonicParsing="false" text="Список клиентов"/>
             </Menu>
             <Menu mnemonicParsing="false" text="Водители">
-                <items>
-                    <MenuItem mnemonicParsing="false" text="Список водителей"/>
-                </items>
+                <MenuItem mnemonicParsing="false" text="Список водителей"/>
             </Menu>
         </MenuBar>
     </top>
@@ -76,6 +73,13 @@
     <bottom>
         <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="90.0" prefWidth="1179.0"
                   BorderPane.alignment="CENTER">
+            <JFXButton mnemonicParsing="false" onMouseClicked="#showStatistic" prefHeight="40.0" prefWidth="170.0"
+                       style="-fx-border-color: rgba(0,0,0,0.5); -fx-background-color: rgba(23,162,184,0.5);"
+                       text="Показать статистику">
+                <FlowPane.margin>
+                    <Insets right="14.0"/>
+                </FlowPane.margin>
+            </JFXButton>
             <JFXButton fx:id="verificationButton" mnemonicParsing="false" onMouseClicked="#verifyDriver"
                        prefHeight="40.0" prefWidth="203.0" style="-fx-border-color: rgba(0,0,0,0.5);"
                        text="Подтвердить аккаунт"/>

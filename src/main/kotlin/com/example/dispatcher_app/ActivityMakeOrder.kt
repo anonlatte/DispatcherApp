@@ -3,9 +3,12 @@ package com.example.dispatcher_app
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXTextField
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.scene.control.Alert
 import javafx.scene.control.Label
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
@@ -20,7 +23,7 @@ class ActivityMakeOrder : Initializable {
 
     private lateinit var pref: Preferences
     @FXML
-    lateinit var erroLabel: Label
+    lateinit var errorLabel: Label
     @FXML
     lateinit var successLabel: Label
     @FXML
@@ -41,11 +44,9 @@ class ActivityMakeOrder : Initializable {
     @FXML
     fun makeOrder() {
         // TODO validation
-        if (startPointEdit.text.isNotEmpty() && destinationEdit.text.isNotEmpty()
-            && additionalInfoEdit.text.isNotEmpty() && phoneNumber.text.isNotEmpty()
+        if (startPointEdit.text.isNotEmpty() && destinationEdit.text.isNotEmpty() && phoneNumber.text.isNotEmpty()
         ) {
             GlobalScope.launch {
-
                 val managedChannel = ManagedChannelBuilder.forAddress(
                     Main.SERVER_ADDRESS,
                     Main.SERVER_PORT
@@ -59,6 +60,7 @@ class ActivityMakeOrder : Initializable {
                 val createCabRideDispatcherRequest = CreateCabRideDispatcherRequest.newBuilder()
                     .setApi(Main.API_VERSION)
                     .setCustomer(customer)
+                    .setCabRide(cabRide)
                     .build()
                 val createCabRideDispatcherResponse: CreateCabRideDispatcherResponse
                 try {
@@ -69,32 +71,49 @@ class ActivityMakeOrder : Initializable {
                         .setCabRideId(createCabRideDispatcherResponse.cabRideId)
                         .setMessage(additionalInfoEdit.text)
                         .build()
-                    try {
-                        val setDetailsToOrderResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
-                            .setDetailsToOrder(setDetailsToOrderRequest)
-                        successLabel.isVisible = true
-                        (successLabel.scene.window as Stage).close()
-                    } catch (e: StatusRuntimeException) {
-                        erroLabel.text = "Заказ был создан, но адрес не был отправлен"
-                        erroLabel.isVisible = true
-                        e.printStackTrace()
+                    if (additionalInfoEdit.text.isNotEmpty()) {
+                        try {
+                            val setDetailsToOrderResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
+                                .setDetailsToOrder(setDetailsToOrderRequest)
+                            Platform.runLater {
+                                successLabel.isVisible = true
+                                (successLabel.scene.window as Stage).close()
+                            }
+                        } catch (e: StatusRuntimeException) {
+                            Platform.runLater {
+                                errorLabel.text = "Заказ был создан, но адрес не был отправлен"
+                                errorLabel.isVisible = true
+                            }
+                            e.printStackTrace()
+                        }
                     }
                     managedChannel.shutdown()
                 } catch (e: StatusRuntimeException) {
-                    // TODO Check exceptions
-                    erroLabel.text = "Заказ не был создан"
-                    erroLabel.isVisible = true
+                    errorLabel.text = "Заказ не был создан"
+                    errorLabel.isVisible = true
+                    if (e.status.cause is java.net.ConnectException) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка соединения"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Неверные данные"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.UNKNOWN) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка сервера"
+                            alert.showAndWait()
+                        }
+                    }
                     e.printStackTrace()
-/*
-                if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.UNKNOWN) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
-                }
-*/
-                    //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
                     managedChannel.shutdown()
                 }
             }

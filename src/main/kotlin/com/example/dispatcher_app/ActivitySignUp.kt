@@ -3,10 +3,12 @@ package com.example.dispatcher_app
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXTextField
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import javafx.application.Application
 import javafx.application.Platform
 import javafx.fxml.FXML
+import javafx.scene.control.Alert
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -64,20 +66,30 @@ class ActivitySignUp : Application() {
                     signInScene()
                 }
             } catch (e: StatusRuntimeException) {
-                managedChannel.shutdown()
-                // TODO вывод сообщения об ошибке
-                /*
                 if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.UNKNOWN.code) {
-                    runOnUiThread { Toast.makeText(this@SignUpActivity, R.string.user_is_already_exists, Toast.LENGTH_LONG).show() }
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка соединения"
+                        alert.showAndWait()
+                    }
+                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Неверные данные"
+                        alert.showAndWait()
+                    }
+                } else if (e.status.code == Status.Code.UNKNOWN) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка сервера"
+                        alert.showAndWait()
+                    }
                 }
-*//*
-                //logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
                 e.printStackTrace()
                 managedChannel.shutdown()
-            }
-        }*/
             }
         }
     }
