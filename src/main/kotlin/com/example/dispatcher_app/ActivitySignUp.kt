@@ -5,15 +5,13 @@ import com.jfoenix.controls.JFXTextField
 import io.grpc.ManagedChannelBuilder
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
-import javafx.application.Application
 import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.scene.control.Alert
-import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class ActivitySignUp : Application() {
+class ActivitySignUp {
     @FXML
     lateinit var signInLabel: JFXButton
     @FXML
@@ -29,15 +27,11 @@ class ActivitySignUp : Application() {
     @FXML
     lateinit var passwordEdit: JFXTextField
 
-    override fun start(primaryStage: Stage?) {
-    }
-
-    // TODO validation
-
     fun signInScene() {
         Main.loadFxml(signInLabel.scene, "activity_sign_in.fxml", "Вход")
     }
 
+    // TODO validation
     fun registerUser() {
         GlobalScope.launch {
             val managedChannel = ManagedChannelBuilder.forAddress(
