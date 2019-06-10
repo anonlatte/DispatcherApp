@@ -122,6 +122,7 @@ class Main : Application() {
 
         @JvmStatic
         fun <T : RecursiveTreeObject<T>?> saveTableToFile(table: JFXTreeTableView<T>, fileName: String) {
+
             val workbook = HSSFWorkbook()
             val sheet = workbook.createSheet("Drivers sheet")
 
@@ -130,23 +131,30 @@ class Main : Application() {
             //
             row = sheet.createRow(rowNum)
 
-            for (i in 0 until table.columns.size) {
-                row.createCell(i).setCellValue(table.columns[i].textProperty().value)
-            }
-            for (i in 0 until table.currentItemsCount) {
-                row = sheet.createRow(i + 1)
-                for (j in 0 until table.columns.size) {
-                    if (table.columns[j].getCellData(i) != null) {
-                        row.createCell(j).setCellValue(table.columns[j].getCellData(i).toString())
-                    } else {
-                        row.createCell(j).setCellValue("")
+            GlobalScope.launch {
+                for (i in 0 until table.columns.size) {
+                    row.createCell(i).setCellValue(table.columns[i].textProperty().value)
+                }
+                for (i in 0 until table.currentItemsCount) {
+                    row = sheet.createRow(i + 1)
+                    for (j in 0 until table.columns.size) {
+                        if (table.columns[j].getCellData(i) != null) {
+                            row.createCell(j).setCellValue(table.columns[j].getCellData(i).toString())
+                        } else {
+                            row.createCell(j).setCellValue("")
+                        }
                     }
                 }
             }
             val outFile = FileOutputStream("${fileName}_" + SimpleDateFormat("yyy-MM-dd").format(Date()) + ".xls")
             workbook.write(outFile)
             System.out.println("Created file")
+            Platform.runLater {
+                val alert = Alert(Alert.AlertType.INFORMATION)
+                alert.title = "Создание файла"
+                alert.headerText = "Файл был создан"
+                alert.showAndWait()
+            }
         }
-
     }
 }

@@ -4,6 +4,7 @@ import com.example.dispatcher_app.taxiServiceGrpc.newBlockingStub
 import com.jfoenix.controls.*
 import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject
 import io.grpc.ManagedChannelBuilder
+import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import javafx.application.Platform
 import javafx.beans.property.SimpleIntegerProperty
@@ -16,6 +17,8 @@ import javafx.scene.control.Alert.AlertType
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TreeItem
 import javafx.util.Callback
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
@@ -226,79 +229,91 @@ class ActivityMain : Initializable {
 
     @FXML
     private fun getDrivers() {
-        // Build connection and rpc objects
-        val managedChannel = ManagedChannelBuilder.forAddress(
-            Main.SERVER_ADDRESS,
-            Main.SERVER_PORT
-        ).usePlaintext().build()
-        val blockingStub = newBlockingStub(managedChannel)
-        val readAllDriversRequest = ReadAllDriversRequest.newBuilder()
-            .setApi(Main.API_VERSION)
-            .build()
-        val readAllDriversResponse: ReadAllDriversResponse
-        try {
-            readAllDriversResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
-                .readAllDrivers(readAllDriversRequest) // Запрос на создание
-            managedChannel.shutdown()
+        GlobalScope.launch {
+            // Build connection and rpc objects
+            val managedChannel = ManagedChannelBuilder.forAddress(
+                Main.SERVER_ADDRESS,
+                Main.SERVER_PORT
+            ).usePlaintext().build()
+            val blockingStub = newBlockingStub(managedChannel)
+            val readAllDriversRequest = ReadAllDriversRequest.newBuilder()
+                .setApi(Main.API_VERSION)
+                .build()
+            val readAllDriversResponse: ReadAllDriversResponse
+            try {
+                readAllDriversResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
+                    .readAllDrivers(readAllDriversRequest) // Запрос на создание
+                managedChannel.shutdown()
 
-            val birthDateFormat = SimpleDateFormat("yyy-MM-dd")
-            val creationDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            var workingStatus: String
-            var verifiedStatus: String
-            driversTableData.clear()
-            readAllDriversResponse.driverList.forEach {
-                workingStatus = if (it.working) {
-                    "Работает"
-                } else {
-                    "Не работает"
-                }
-                verifiedStatus = if (it.activated) {
-                    "Активирован"
-                } else {
-                    "Не активирован"
-                }
-                driversTableData.add(
-                    DriverInfo(
-                        it.id, it.firstName, it.surname, it.partronymic,
-                        birthDateFormat.format(it.birthDate.seconds * 1000), it.phoneNumber, workingStatus,
-                        it.email, verifiedStatus, creationDateFormat.format(it.createTime.seconds * 1000)
+                val birthDateFormat = SimpleDateFormat("yyy-MM-dd")
+                val creationDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                var workingStatus: String
+                var verifiedStatus: String
+                driversTableData.clear()
+                readAllDriversResponse.driverList.forEach {
+                    workingStatus = if (it.working) {
+                        "Работает"
+                    } else {
+                        "Не работает"
+                    }
+                    verifiedStatus = if (it.activated) {
+                        "Активирован"
+                    } else {
+                        "Не активирован"
+                    }
+                    driversTableData.add(
+                        DriverInfo(
+                            it.id, it.firstName, it.surname, it.partronymic,
+                            birthDateFormat.format(it.birthDate.seconds * 1000), it.phoneNumber, workingStatus,
+                            it.email, verifiedStatus, creationDateFormat.format(it.createTime.seconds * 1000)
+                        )
                     )
-                )
-            }
-            Platform.runLater {
-                driversTable.isShowRoot = false
-                driversTableTree =
-                    RecursiveTreeItem<DriverInfo>(driversTableData, RecursiveTreeObject<DriverInfo>::getChildren)
-                driversTable.columns.setAll(
-                    idColumn,
-                    surnameColumn,
-                    nameColumn,
-                    patronymicColumn,
-                    birthDateColumn,
-                    phoneColumn,
-                    statusColumn,
-                    emailColumn,
-                    activatedColumn,
-                    createDateColumn
-                )
-                driversTable.root = driversTableTree
-            }
-
-        } catch (e: StatusRuntimeException) {
-            // TODO Check exceptions
-            // TODO вывод сообщения об ошибке
-            e.printStackTrace()
-/*
-                if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.UNKNOWN) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
                 }
-*/
-            //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
-            managedChannel.shutdown()
+                Platform.runLater {
+                    driversTable.isShowRoot = false
+                    driversTableTree =
+                        RecursiveTreeItem<DriverInfo>(driversTableData, RecursiveTreeObject<DriverInfo>::getChildren)
+                    driversTable.columns.setAll(
+                        idColumn,
+                        surnameColumn,
+                        nameColumn,
+                        patronymicColumn,
+                        birthDateColumn,
+                        phoneColumn,
+                        statusColumn,
+                        emailColumn,
+                        activatedColumn,
+                        createDateColumn
+                    )
+                    driversTable.root = driversTableTree
+                }
+
+            } catch (e: StatusRuntimeException) {
+                if (e.status.cause is java.net.ConnectException) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка соединения"
+                        alert.showAndWait()
+                    }
+                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Неверные данные"
+                        alert.showAndWait()
+                    }
+                } else if (e.status.code == Status.Code.UNKNOWN) {
+                    Platform.runLater {
+                        val alert = Alert(Alert.AlertType.ERROR)
+                        alert.title = "Ошибка"
+                        alert.headerText = "Ошибка сервера"
+                        alert.showAndWait()
+                    }
+                }
+                e.printStackTrace()
+                managedChannel.shutdown()
+            }
         }
     }
 
@@ -308,36 +323,48 @@ class ActivityMain : Initializable {
 
 
         if (selectedDriver != null) {
-            val managedChannel = ManagedChannelBuilder.forAddress(
-                Main.SERVER_ADDRESS,
-                Main.SERVER_PORT
-            ).usePlaintext().build()
-            val blockingStub = newBlockingStub(managedChannel)
-            val verifyDriversAccountRequest = VerifyDriversAccountRequest.newBuilder()
-                .setApi(Main.API_VERSION)
-                .setDriverId(selectedDriver.driverId)
-                .build()
-            val verifyDriversAccountResponse: VerifyDriversAccountResponse
-            try {
-                verifyDriversAccountResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
-                    .verifyDriversAccount(verifyDriversAccountRequest) // Запрос на создание
-                managedChannel.shutdown()
-                getDrivers()
-            } catch (e: StatusRuntimeException) {
-                // TODO Check exceptions
-                // TODO вывод сообщения об ошибке
-                e.printStackTrace()
-/*
-                if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.UNKNOWN) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+            GlobalScope.launch {
+                val managedChannel = ManagedChannelBuilder.forAddress(
+                    Main.SERVER_ADDRESS,
+                    Main.SERVER_PORT
+                ).usePlaintext().build()
+                val blockingStub = newBlockingStub(managedChannel)
+                val verifyDriversAccountRequest = VerifyDriversAccountRequest.newBuilder()
+                    .setApi(Main.API_VERSION)
+                    .setDriverId(selectedDriver.driverId)
+                    .build()
+                val verifyDriversAccountResponse: VerifyDriversAccountResponse
+                try {
+                    verifyDriversAccountResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
+                        .verifyDriversAccount(verifyDriversAccountRequest) // Запрос на создание
+                    managedChannel.shutdown()
+                    getDrivers()
+                } catch (e: StatusRuntimeException) {
+                    if (e.status.cause is java.net.ConnectException) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка соединения"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Неверные данные"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.UNKNOWN) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка сервера"
+                            alert.showAndWait()
+                        }
+                    }
+                    e.printStackTrace()
+                    managedChannel.shutdown()
                 }
-*/
-                //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
-                managedChannel.shutdown()
             }
         }
     }
@@ -350,45 +377,56 @@ class ActivityMain : Initializable {
     fun showStatistic() {
         val selectedDriver = driversTable.selectionModel.selectedItem.value
 
-
         if (selectedDriver != null) {
+            GlobalScope.launch {
+                val managedChannel = ManagedChannelBuilder.forAddress(
+                    Main.SERVER_ADDRESS,
+                    Main.SERVER_PORT
+                ).usePlaintext().build()
+                val blockingStub = newBlockingStub(managedChannel)
+                val readDriverStatisticRequest = ReadDriverStatisticRequest.newBuilder()
+                    .setApi(Main.API_VERSION)
+                    .setDriverId(selectedDriver.driverId)
+                    .build()
+                val readDriverStatisticResponse: ReadDriverStatisticResponse
+                try {
+                    readDriverStatisticResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
+                        .readDriverStatistic(readDriverStatisticRequest) // Запрос на создание
+                    managedChannel.shutdown()
 
-            val managedChannel = ManagedChannelBuilder.forAddress(
-                Main.SERVER_ADDRESS,
-                Main.SERVER_PORT
-            ).usePlaintext().build()
-            val blockingStub = newBlockingStub(managedChannel)
-            val readDriverStatisticRequest = ReadDriverStatisticRequest.newBuilder()
-                .setApi(Main.API_VERSION)
-                .setDriverId(selectedDriver.driverId)
-                .build()
-            val readDriverStatisticResponse: ReadDriverStatisticResponse
-            try {
-                readDriverStatisticResponse = blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS)
-                    .readDriverStatistic(readDriverStatisticRequest) // Запрос на создание
-                managedChannel.shutdown()
-
-                val alert = Alert(AlertType.INFORMATION)
-                alert.title = "Статистика " + selectedDriver.surname + " " + selectedDriver.firstName
-                alert.headerText =
-                    "Количество выполненных заказов:" + readDriverStatisticResponse.endedCabRides.toString()
-                alert.showAndWait()
-
-            } catch (e: StatusRuntimeException) {
-                // TODO Check exceptions
-                // TODO вывод сообщения об ошибке
-                e.printStackTrace()
-/*
-                if (e.status.cause is java.net.ConnectException) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_internet_connection, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_wrong_data, Toast.LENGTH_LONG).show() }
-                } else if (e.status.code == Status.Code.UNKNOWN) {
-                    runOnUiThread { Toast.makeText(this@SignInActivity, R.string.error_message_server, Toast.LENGTH_LONG).show() }
+                    Platform.runLater {
+                        val alert = Alert(AlertType.INFORMATION)
+                        alert.title = "Статистика " + selectedDriver.surname + " " + selectedDriver.firstName
+                        alert.headerText =
+                            "Количество выполненных заказов:" + readDriverStatisticResponse.endedCabRides.toString()
+                        alert.showAndWait()
+                    }
+                } catch (e: StatusRuntimeException) {
+                    if (e.status.cause is java.net.ConnectException) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка соединения"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.NOT_FOUND || e.status.code == Status.Code.PERMISSION_DENIED) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Неверные данные"
+                            alert.showAndWait()
+                        }
+                    } else if (e.status.code == Status.Code.UNKNOWN) {
+                        Platform.runLater {
+                            val alert = Alert(Alert.AlertType.ERROR)
+                            alert.title = "Ошибка"
+                            alert.headerText = "Ошибка сервера"
+                            alert.showAndWait()
+                        }
+                    }
+                    e.printStackTrace()
+                    managedChannel.shutdown()
                 }
-*/
-                //                                logger.log(Level.WARNING, "RPC failed: " + e.getStatus());
-                managedChannel.shutdown()
             }
         }
     }
