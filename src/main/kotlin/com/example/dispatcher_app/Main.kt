@@ -15,10 +15,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Row
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -30,19 +28,18 @@ class Main : Application() {
         val savedToken = pref.get("auth_token", "")
         val savedLogin = pref.get("login", "")
 
-        val properties = Properties()
-        val input: InputStream
-        try {
-            input = FileInputStream("gradle.properties")
-            properties.load(input)
-            SERVER_ADDRESS = properties.getProperty("ServerAddress")
-            SERVER_PORT = properties.getProperty("ServerPort").toInt()
-            API_VERSION = properties.getProperty("API_VERSION")
-            GOOGLE_MAPS_API_KEY = properties.getProperty("GOOGLE_MAPS_API_KEY")
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
+        /*   val properties = Properties()
+           val input: InputStream
+           try {
+               input = FileInputStream("server.properties")
+               properties.load(input)
+               SERVER_ADDRESS = properties.getProperty("ServerAddress")
+               SERVER_PORT = properties.getProperty("ServerPort").toInt()
+               API_VERSION = properties.getProperty("API_VERSION")
+           } catch (e: IOException) {
+               e.printStackTrace()
+           }
+   */
         if (savedToken.isNotEmpty()) {
             GlobalScope.launch {
                 val managedChannel =
@@ -90,10 +87,9 @@ class Main : Application() {
     }
 
     companion object {
-        var SERVER_ADDRESS: String = ""
-        var SERVER_PORT: Int = 0
-        var API_VERSION: String = ""
-        var GOOGLE_MAPS_API_KEY: String = ""
+        var SERVER_ADDRESS: String = "10.21.57.86"
+        var SERVER_PORT: Int = 48695
+        var API_VERSION: String = "v1"
 
         @JvmStatic
         fun main(args: Array<String>) {
